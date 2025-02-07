@@ -108,21 +108,50 @@ st.plotly_chart(fig)
 ### 7. Salaire médian par expérience et taille d'entreprise
 # utilisez median(), px.bar
 #votre code 
+salaire_median = df.groupby(["experience_level", "company_size"])["salary_in_usd"].median().reset_index()
 
+fig = px.bar(salaire_median, 
+             x="experience_level", 
+             y="salary_in_usd", 
+             color="company_size", 
+             barmode="group", 
+             title="Salaire médian par niveau d'expérience et taille d'entreprise",
+             labels={"salary_in_usd": "Salaire médian (USD)", "experience_level": "Niveau d'expérience"},
+             category_orders={"experience_level": ["EN", "MI", "EX", "SE"]})
 
-
+st.subheader("📊 Salaire médian par niveau d'expérience et taille d'entreprise")
+st.plotly_chart(fig)
 
 ### 8. Ajout de filtres dynamiques
 #Filtrer les données par salaire utilisant st.slider pour selectionner les plages 
 #votre code 
 
+min_salaire, max_salaire = st.slider(
+    "Filtrer les données par salaire", 
+    min_value=int(df["salary_in_usd"].min()), 
+    max_value=int(df["salary_in_usd"].max()), 
+    value=(int(df["salary_in_usd"].min()), int(df["salary_in_usd"].max())),
+    step=1000
+)
 
+filtered_df = df[(df["salary_in_usd"] >= min_salaire) & (df["salary_in_usd"] <= max_salaire)]
 
+st.dataframe(filtered_df)
 
 ### 9.  Impact du télétravail sur le salaire selon le pays
 
+df_teletravail = df[df["remote_work"].notna()]
 
+salaire_tele_par_pays = df_teletravail.groupby(["country", "remote_work"])["salary_in_usd"].mean().reset_index()
 
+fig = px.bar(salaire_tele_par_pays, 
+             x="country", 
+             y="salary_in_usd", 
+             color="remote_work", 
+             title="Impact du télétravail sur le salaire selon le pays",
+             barmode="group")
+
+st.plotly_chart(fig)
 
 ### 10. Filtrage avancé des données avec deux st.multiselect, un qui indique "Sélectionnez le niveau d'expérience" et l'autre "Sélectionnez la taille d'entreprise"
 #votre code 
